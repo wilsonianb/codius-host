@@ -44,3 +44,35 @@ sudo /etc/init.d/dnsmasq restart
 ```
 
 Afterwards, configure your Codius host to use "localcodius" as its hostname. You'll be able to access local contracts using URLs like https://abcabc-abcabc-abcabc.localcodius:2633.
+
+## Registering with the host
+
+Hosts use [Ed25519](http://ed25519.cr.yp.to/) public keys to identify users.
+
+### `POST /user`
+
+#### Request
+
+```js
+{
+  "public_key": "jRYkLrNGob3TqxJsvhSll3BE8pE2w8VmOXzB6cs1nFk="
+}
+```
+
+This request must be signed with the [Ed25519 version](https://github.com/codius/node-http-signature) of the HTTP Signature Scheme.
+
+#### Response
+
+```js
+{
+  "public_key": "jRYkLrNGob3TqxJsvhSll3BE8pE2w8VmOXzB6cs1nFk=",
+  "bitcoin_address": "12KurTLijZDM3rJUxPccpJhXBc3ccrWQ3h",
+  "compute_units": 100000,
+  "compute_units_per_bitcoin": 100000000
+}
+```
+
++ `public_key` - the user's Ed25519 public key
++ `bitcoin_address` - the address that the user must pay to fund their account
++ `compute_units` - the user's balance with the host
++ `compute_units_per_bitcoin` - the cost per compute unit in Bitcoin

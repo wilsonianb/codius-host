@@ -8,9 +8,15 @@ var tls = require('tls');
 var net = require('net');
 var fs = require('fs');
 var path = require('path');
+var bodyParser = require('body-parser');
 
 // Load application components - order matters
 var config = require('./lib/config');
+
+if (!config.get('bitcoin_bip32_extended_public_key')) {
+  throw new Error('Host must be started with a BIP32 Bitcoin Public Key to generate user addresses. Visit https://bip32jp.github.io/english to generate one');
+}
+
 // Log should be loaded before any components that might log during startup
 var log = require('./lib/log');
 var db = require('./lib/db');
@@ -25,6 +31,7 @@ app.use(morgan(config.get('log_format'), {stream: log.winstonStream}))
 var routeGetHealth = require('./routes/get_health');
 var routePostContract = require('./routes/post_contract');
 var routePostToken = require('./routes/post_token');
+var routePostUser = require('./routes/post_user');
 
 app.set('config', config);
 app.set('knex', db.knex);
@@ -36,6 +43,18 @@ app.set('engine', engine.engine);
 app.get('/health', routeGetHealth);
 app.post('/contract', routePostContract);
 app.post('/token', routePostToken);
+app.post('/user', bodyParser.json(), routePostUser); // note the JSON bodyParser
+
+app.use(function(err, req, res, next){
+  if (err) {
+    console.log(err.stack);
+    var status = err.status || 500;
+    var message = err.message;
+    res.status(status).json({
+      error: message
+    });
+  }
+});
 
 var unique = 0, internalServer;
 // Run migrations
