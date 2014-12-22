@@ -23,6 +23,7 @@ var db = require('./lib/db');
 var engine = require('./lib/engine');
 var tokenLib = require('./lib/token');
 var manager = require('./lib/manager');
+var bitcoin = require('./lib/bitcoin');
 
 var app = express();
 
@@ -67,6 +68,11 @@ db.knex.migrate.latest().then(function () {
   // A port value of zero means a randomly assigned port
   internalServer = http.createServer(app);
   return Promise.promisifyAll(internalServer).listenAsync(0, '127.0.0.1');
+}).then(function (){
+
+  // Start listening to the Bitcoin network
+  new bitcoin.BitcoinMonitor().pollNetwork();
+
 }).then(function () {
   // Create public-facing (TLS) server
   var tlsServer = tls.createServer({
