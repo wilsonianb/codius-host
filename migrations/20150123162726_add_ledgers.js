@@ -17,14 +17,16 @@
 */
 //==============================================================================
 
-var path = require('path');
+'use strict';
 
-module.exports.Server         = require(path.join(__dirname, 'server'));
-module.exports.Application    = require(path.join(__dirname, 'application'));
-module.exports.BillingService = require(path.join(__dirname, 'billing_service'));
-module.exports.Manager        = require(path.join(__dirname, 'manager')).Manager;
-module.exports.features       = require(path.join(__dirname, 'features'));
-module.exports.config         = require(path.join(__dirname, 'config'));
-module.exports.Ledger         = require(path.join(__dirname, '../models/ledger')).model;
-module.exports.Token          = require(path.join(__dirname, '../models/ledger')).model;
+exports.up = function(knex, Promise) {
+  return knex.schema.createTable('ledgers', function (t) {
+    t.increments().primary();
+    t.string('name', 20).unique();
+    t.string('last_hash');
+  });
+};
 
+exports.down = function(knex, Promise) {
+  return knex.schema.dropTable('ledgers');
+};
